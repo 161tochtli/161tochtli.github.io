@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portafolio Animado</title>
+    <title>Juan Patrón</title>
     <!-- Importar fuente formal para las letras animadas -->
     <link href="https://fonts.googleapis.com/css2?family=Georgia:wght@400&display=swap" rel="stylesheet">
     <!-- Importar Chart.js para crear el scatter plot -->
@@ -366,20 +366,24 @@
         function showFinalBlock() {
             const finalBlock = document.createElement('div');
             finalBlock.classList.add('final-block');
+            
+            // Create the HTML content dynamically using JavaScript, where variables are properly evaluated
             finalBlock.innerHTML = `
                 <div>${nombre}</div>
                 <div>${subtitulo}</div>
                 <div>${portafolioText}</div>
                 <div><a href="${portafolioURL}" target="_blank">${linkText}</a></div>
             `;
+            
             finalBlockContainer.appendChild(finalBlock);
-
+        
             // Hacer aparecer el bloque final con fade-in y desplazamiento desde la derecha
             setTimeout(() => {
                 finalBlock.style.opacity = 1;
                 finalBlock.style.transform = 'translateX(0)'; /* Desplazamiento a la posición final */
             }, 100);
         }
+
 
         // Crear el gráfico scatter usando Chart.js
         const ctxChart = document.getElementById('edgeChart').getContext('2d');
