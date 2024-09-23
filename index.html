@@ -51,11 +51,11 @@
             font-size: 36px;
             color: #C0C0C0; /* Plateado */
             opacity: 0;
-            pointer-events: none;
+            pointer-events: auto; /* Ensure that the block can handle pointer events */
             transform: translateX(50px); /* Comienza ligeramente a la derecha */
             transition: opacity 1s ease, transform 1s ease; /* Animar opacidad y desplazamiento */
             text-align: center;
-            z-index: 3;
+            z-index: 5; /* Ensure it's above other elements */
             margin-bottom: 20px;
         }
 
@@ -67,7 +67,7 @@
             width: 50%; /* Estirar la gráfica horizontalmente */
             height: 400px; /* Hacer la gráfica más grande */
             margin-bottom: 20px;
-            background-color: rgba(128, 128, 128, 0.8); /* Fondo gris transparente */
+            background-color: rgba(128, 128, 128, 0.9); /* Fondo gris claro transparente */
             border-radius: 10px; /* Bordes redondeados */
             z-index: 3;
         }
@@ -283,7 +283,7 @@
 
         const outputElement = document.getElementById('output');
 
-        const nombre = ""; // Reemplaza con tu nombre
+        const nombre = "Juan Patrón"; // Reemplaza con tu nombre
         const subtitulo = "ML Engineering"; // Reemplaza con tu subtítulo
         const portafolioText = "Visita mi portafolio:";
         const linkText = "https://juanpatron.notion.site";
@@ -394,6 +394,7 @@
                     label: 'Cantidad de Conexiones vs Tiempo',
                     data: [],
                     backgroundColor: '#FFBA00', // Color de los puntos
+                    borderWidth: 2
                 }]
             },
             options: {
@@ -405,6 +406,9 @@
                             display: true,
                             text: 'Tiempo',
                             color: '#FFF'
+                        },
+                        grid: {
+                            display: false // Eliminar el grid de fondo en el eje X
                         }
                     },
                     y: {
@@ -412,6 +416,16 @@
                             display: true,
                             text: 'Conexiones',
                             color: '#FFF'
+                        },
+                        grid: {
+                            display: false // Eliminar el grid de fondo en el eje Y
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#FFF' // Color del texto de la leyenda
                         }
                     }
                 }
