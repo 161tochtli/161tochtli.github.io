@@ -3,66 +3,423 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sitio Migrado</title>
+    <title>Portafolio Animado</title>
+    <!-- Importar fuente formal para las letras animadas -->
+    <link href="https://fonts.googleapis.com/css2?family=Georgia:wght@400&display=swap" rel="stylesheet">
+    <!-- Importar Chart.js para crear el scatter plot -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* Estilos del cuerpo */
         body {
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
-            background: #000; /* Fondo negro */
-            color: white;
+            height: 100vh;
+            background-color: #31013F;
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-image: linear-gradient(135deg, rgba(0, 0, 255, 0.1) 25%, transparent 25%), 
-                              linear-gradient(225deg, rgba(0, 0, 255, 0.1) 25%, transparent 25%),
-                              linear-gradient(45deg, rgba(0, 0, 255, 0.1) 25%, transparent 25%),
-                              linear-gradient(315deg, rgba(0, 0, 255, 0.1) 25%, transparent 25%);
-            background-position: center;
-            background-size: 50px 50px;
+            font-family: 'Courier New', Courier, monospace; /* Fuente para la consola */
         }
 
+        /* Contenedor principal */
         .container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+        }
+
+        /* Canvas para las aristas y nodos */
+        #nodos {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Estilos para el bloque final */
+        .final-block {
+            position: relative;
+            font-family: 'Georgia', serif;
+            font-size: 36px;
+            color: #C0C0C0; /* Plateado */
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(50px); /* Comienza ligeramente a la derecha */
+            transition: opacity 1s ease, transform 1s ease; /* Animar opacidad y desplazamiento */
             text-align: center;
-            background-color: rgba(0, 0, 0, 0.8); /* Fondo ligeramente transparente */
-            padding: 50px;
+            z-index: 3;
+            margin-bottom: 20px;
+        }
+
+        /* Estilo para el gráfico */
+        .chart-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 50%; /* Estirar la gráfica horizontalmente */
+            height: 400px; /* Hacer la gráfica más grande */
+            margin-bottom: 20px;
+            background-color: rgba(128, 128, 128, 0.8); /* Fondo gris transparente */
+            border-radius: 10px; /* Bordes redondeados */
+            z-index: 3;
+        }
+
+        /* Estilos de la terminal simulada */
+        .terminal {
+            background-color: rgba(0, 0, 0, 0.7); /* Terminal transparente */
+            color: #FFF800;
+            width: 70%; /* Ajustar el ancho de la terminal */
+            max-width: 800px;
+            padding: 15px;
             border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 255, 0.7); /* Sombra azul */
+            box-shadow: 0 0 10px #800080;
+            z-index: 3;
+            font-size: 16px;
         }
 
-        h1 {
-            font-size: 3em;
-            color: #00f; /* Azul */
+        /* Barra superior de la terminal */
+        .terminal-header {
+            display: flex;
+            justify-content: flex-start;
+            gap: 8px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #555;
         }
 
-        p {
-            font-size: 1.5em;
-            margin: 20px 0;
+        .terminal-header div {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
         }
 
+        .close {
+            background-color: #ff5f56;
+        }
+
+        .minimize {
+            background-color: #ffbd2e;
+        }
+
+        .maximize {
+            background-color: #27c93f;
+        }
+
+        /* Simulación del texto que aparece en una terminal */
+        .terminal p {
+            margin: 5px 0;
+            white-space: pre-wrap;
+            font-family: 'Courier New', Courier, monospace; /* Mantener la fuente en la consola */
+        }
+
+        .command {
+            color: #FFBA00; /* Color naranja para el prompt */
+        }
+
+        /* Estilo del cursor intermitente */
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background-color: #FFF800;
+            animation: blink 1s step-start 0s infinite;
+            vertical-align: bottom;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* Estilo del enlace en la terminal */
         a {
+            color: #FFBA00; /* Naranja */
             text-decoration: none;
-            color: #00f;
             font-weight: bold;
-            font-size: 1.2em;
-            border: 2px solid #00f;
-            padding: 10px 20px;
-            border-radius: 5px;
-            transition: background-color 0.3s, color 0.3s;
         }
 
         a:hover {
-            background-color: #00f;
-            color: #fff;
+            text-decoration: underline;
         }
+
+        /* Estilo para el contador de aristas */
+        .edge-counter {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            color: #FFF800;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 24px;
+            z-index: 5;
+        }
+
     </style>
 </head>
 <body>
+    <!-- Canvas donde dibujaremos las aristas y nodos -->
+    <canvas id="nodos"></canvas>
+
+    <!-- Contenedor principal -->
     <div class="container">
-        <h1>Sitio Migrado</h1>
-        <p>Este sitio ha sido migrado a un nuevo enlace.</p>
-        <a href="https://nuevositio.com">Ir al nuevo sitio</a>
+        <!-- Contenedor para el bloque de texto final -->
+        <div id="final-block-container"></div>
+
+        <!-- Contenedor para el gráfico -->
+        <div class="chart-container">
+            <canvas id="edgeChart"></canvas>
+        </div>
+
+        <!-- Terminal simulada -->
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="close"></div>
+                <div class="minimize"></div>
+                <div class="maximize"></div>
+            </div>
+            <div id="output"></div>
+        </div>
     </div>
+
+    <!-- Contador de aristas -->
+    <div class="edge-counter" id="edge-counter">Conexiones: 0</div>
+
+    <script>
+        const canvas = document.getElementById('nodos');
+        const ctx = canvas.getContext('2d');
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        // Ajustar tamaño del canvas cuando se cambia el tamaño de la ventana
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        // Animación de nodos (se mantiene siempre)
+        const nodes = [];
+        const maxNodes = 100;
+        const nodeRadius = 2;
+        const maxDistance = 120;
+
+        // Crear nodos aleatorios
+        for (let i = 0; i < maxNodes; i++) {
+            nodes.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                vx: (Math.random() - 0.5) * 1,
+                vy: (Math.random() - 0.5) * 1,
+            });
+        }
+
+        let edgeCount = 0; // Contador de aristas
+        const edgeCounterElement = document.getElementById('edge-counter'); // Elemento del contador de aristas
+        let edgeData = []; // Array para almacenar los datos del gráfico (cantidad de aristas en el tiempo)
+        let timeElapsed = 0; // Tiempo transcurrido en segundos
+
+        // Función para dibujar nodos y aristas
+        function drawNodes() {
+            ctx.clearRect(0, 0, width, height);
+            edgeCount = 0; // Reiniciar el conteo de aristas en cada frame
+
+            // Dibujar nodos
+            for (let i = 0; i < nodes.length; i++) {
+                const node = nodes[i];
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, nodeRadius, 0, Math.PI * 2);
+                ctx.fillStyle = '#FFF800'; // Color de los nodos (amarillo)
+                ctx.fill();
+            }
+
+            // Dibujar aristas si los nodos están cerca
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const nodeA = nodes[i];
+                    const nodeB = nodes[j];
+                    const dx = nodeA.x - nodeB.x;
+                    const dy = nodeA.y - nodeB.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < maxDistance) {
+                        edgeCount++; // Contar la arista
+                        ctx.beginPath();
+                        ctx.moveTo(nodeA.x, nodeA.y);
+                        ctx.lineTo(nodeB.x, nodeB.y);
+                        ctx.strokeStyle = `rgba(255, 255, 128, ${1 - distance / maxDistance})`; // Color de las aristas (amarillo suave)
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            // Actualizar posiciones de los nodos
+            for (let i = 0; i < nodes.length; i++) {
+                const node = nodes[i];
+                node.x += node.vx;
+                node.y += node.vy;
+
+                if (node.x < 0 || node.x > width) node.vx *= -1;
+                if (node.y < 0 || node.y > height) node.vy *= -1;
+            }
+
+            requestAnimationFrame(drawNodes);
+        }
+
+        // Actualizar el contador de aristas cada 0.3 segundos
+        setInterval(() => {
+            edgeCounterElement.textContent = `Conexiones: ${edgeCount}`;
+            timeElapsed += 0.3; // Incrementar el tiempo en intervalos de 0.3 segundos
+            edgeData.push({ x: timeElapsed.toFixed(1), y: edgeCount }); // Agregar el número de aristas y el tiempo al array
+            updateChart(); // Actualizar el gráfico con los nuevos datos
+        }, 300);
+
+        drawNodes(); // Iniciar la animación de nodos
+
+        const outputElement = document.getElementById('output');
+
+        const nombre = ""; // Reemplaza con tu nombre
+        const subtitulo = "ML Engineering"; // Reemplaza con tu subtítulo
+        const portafolioText = "Visita mi portafolio:";
+        const linkText = "https://juanpatron.notion.site";
+        const portafolioURL = "https://juanpatron.notion.site"; // Reemplaza con el enlace a tu portafolio
+
+        const finalBlockContainer = document.getElementById('final-block-container');
+
+        // Simulación de la terminal con escritura animada y cursor intermitente
+        const lines = [
+            { prompt: true, text: `name="${nombre}"` },
+            { prompt: true, text: `property="Portafolio"` },
+            { prompt: true, text: `show $name $property` },
+            { prompt: true, text: '' },
+        ];
+
+        let currentLine = 0;
+        let currentChar = 0;
+        let currentElement = null;
+        let currentText = '';
+        let cursorElement = null;
+
+        function typeCharacter() {
+            if (currentLine < lines.length) {
+                let line = lines[currentLine];
+
+                if (!currentElement) {
+                    currentElement = document.createElement('p');
+                    outputElement.appendChild(currentElement);
+
+                    if (line.prompt) {
+                        let promptSpan = document.createElement('span');
+                        promptSpan.classList.add('command');
+                        promptSpan.textContent = 'portafolio:~$ ';
+                        currentElement.appendChild(promptSpan);
+                    }
+
+                    currentText = line.text;
+                    currentChar = 0;
+
+                    // Añadir el cursor
+                    cursorElement = document.createElement('span');
+                    cursorElement.classList.add('cursor');
+                    currentElement.appendChild(cursorElement);
+                }
+
+                if (currentChar < currentText.length) {
+                    let nextChar = currentText[currentChar];
+                    currentChar++;
+
+                    // Insertar el carácter antes del cursor
+                    currentElement.insertBefore(document.createTextNode(nextChar), cursorElement);
+
+                    setTimeout(typeCharacter, 50); // Velocidad de escritura letra por letra
+                } else {
+                    // Remover el cursor actual
+                    cursorElement.remove();
+                    cursorElement = null;
+
+                    currentElement = null;
+
+                    if (line.text.includes('show $name $property')) {
+                        // Mostrar el bloque final cuando se ejecute el comando show
+                        setTimeout(showFinalBlock, 285);
+                    }
+
+                    currentLine++;
+                    setTimeout(typeCharacter, 500); // Pausa entre líneas
+                }
+            } else {
+                // Remover el cursor al finalizar
+                if (cursorElement) {
+                    cursorElement.remove();
+                }
+            }
+        }
+
+        typeCharacter(); // Iniciar la animación de escritura en la terminal
+
+        // Función para mostrar el bloque final de texto con fade-in desde la derecha
+        function showFinalBlock() {
+            const finalBlock = document.createElement('div');
+            finalBlock.classList.add('final-block');
+            finalBlock.innerHTML = `
+                <div>${nombre}</div>
+                <div>${subtitulo}</div>
+                <div>${portafolioText}</div>
+                <div><a href="${portafolioURL}" target="_blank">${linkText}</a></div>
+            `;
+            finalBlockContainer.appendChild(finalBlock);
+
+            // Hacer aparecer el bloque final con fade-in y desplazamiento desde la derecha
+            setTimeout(() => {
+                finalBlock.style.opacity = 1;
+                finalBlock.style.transform = 'translateX(0)'; /* Desplazamiento a la posición final */
+            }, 100);
+        }
+
+        // Crear el gráfico scatter usando Chart.js
+        const ctxChart = document.getElementById('edgeChart').getContext('2d');
+        const edgeChart = new Chart(ctxChart, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Cantidad de Conexiones vs Tiempo',
+                    data: [],
+                    backgroundColor: '#FFBA00', // Color de los puntos
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        title: {
+                            display: true,
+                            text: 'Tiempo',
+                            color: '#FFF'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Conexiones',
+                            color: '#FFF'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Función para actualizar el gráfico
+        function updateChart() {
+            edgeChart.data.datasets[0].data = edgeData;
+            edgeChart.update();
+        }
+
+    </script>
 </body>
 </html>
